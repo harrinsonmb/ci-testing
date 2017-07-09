@@ -1,0 +1,47 @@
+version: '3'
+services:
+  gitlab:
+    image: 'gitlab/gitlab-ce:8.13.12-ce.0'
+    restart: unless-stopped
+    hostname: 'gitlab.dev'
+    environment:
+      GITLAB_OMNIBUS_CONFIG: |
+        gitlab_rails['gitlab_shell_ssh_port'] = 22
+        gitlab_rails['git_timeout'] = 600
+    ports:
+      - '80:80'
+      - '443:443'
+      - '22:22'
+    volumes:
+      - config-gitlab:/etc/gitlab
+      - logs-gitlab:/var/log/gitlab
+      - data-gitlab:/var/opt/gitlab
+      #user/pass root/XB2n6Rmq
+      #token pC8nzDX5GuqvPYV4pvqX
+    networks:
+      - jen-git-network
+  jenkins:
+    image: 'jenkins:2.3'
+    restart: always
+    ports:
+      - '8080:8080'
+      - '50000:50000'
+      # hmosquera/XB2n6Rmq
+    volumes:
+      - data-jenkins:/var/jenkins_home
+    links:
+      - gitlab
+    networks:
+      - jen-git-network
+networks:
+  jen-git-network:
+    driver: bridge
+volumes:
+  data-gitlab:
+      external: true
+  logs-gitlab:
+      external: true
+  config-gitlab:
+      external: true
+  data-jenkins:
+      external: true  
